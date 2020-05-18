@@ -55,6 +55,15 @@ version you can perform the following:
    from taxii2client.v21 import Server
    server = Server('https://example.com/taxii2/', user='user_id', password='user_password')
 
+Alternatively, any valid requests authentication class can be used.  The ``taxii2client.common`` module includes a
+`requests <https://requests.readthedocs.io/en/master/>`__ class for api key authentication.
+
+.. code-block:: python
+
+   from taxii2client.v21 import Server
+   from taxii2client.common import HTTPConnection, TokenAuth
+   server = Server('https://example.com/taxii2/', conn=HTTPConnection(auth=TokenAuth('<apikey>')))
+
 Once you have instantiated a ``Server`` object, you can get all metadata about
 its contents via its properties:
 
