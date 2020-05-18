@@ -137,6 +137,15 @@ def _grab_total_items(resp):
         ), e)
 
 
+class TokenAuth(requests.auth.AuthBase):
+    def __init__(self, key):
+        self.key = key
+
+    def __call__(self, r):
+        r.headers['Authorization'] = 'Token {}'.format(self.key)
+        return r
+
+
 class TAXIIEndpoint(object):
     """Contains some data and functionality common to all TAXII endpoint
     classes: a URL, connection, and ability to close the connection.  It also
@@ -161,10 +170,12 @@ class TAXIIEndpoint(object):
         if conn and (user or password):
             raise InvalidArgumentsError("A connection and user/password may"
                                         " not both be provided.")
-        elif conn:
+
+        if isinstance(conn, HTTPConnection):
             self._conn = conn
         else:
-            self._conn = HTTPConnection(user, password, verify, proxies, version=version)
+            self._conn = HTTPConnection(auth=None if user is None and password is None else (user, password, ),
+                                        verify=verify, proxies=proxies, version=version)
 
         # Add trailing slash to TAXII endpoint if missing
         # https://github.com/oasis-open/cti-taxii-client/issues/50
@@ -200,7 +211,7 @@ class HTTPConnection(object):
 
     """
 
-    def __init__(self, user=None, password=None, verify=True, proxies=None,
+    def __init__(self, auth=None, verify=True, proxies=None,
                  user_agent=DEFAULT_USER_AGENT, version="2.0"):
         """Create a connection session.
 
@@ -219,8 +230,14 @@ class HTTPConnection(object):
         self.session.verify = verify
         # enforce that we always have a connection-default user agent.
         self.user_agent = user_agent or DEFAULT_USER_AGENT
-        if user and password:
-            self.session.auth = requests.auth.HTTPBasicAuth(user, password)
+
+        if isinstance(auth, tuple):
+            self.session.auth = requests.auth.HTTPBasicAuth(*auth)
+        elif isinstance(auth, six.string_types):
+            self.session.auth = TokenAuth(auth)
+        elif auth is not None:
+            self.session.auth = auth
+
         if proxies:
             self.session.proxies.update(proxies)
         self.version = version

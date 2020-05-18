@@ -716,6 +716,7 @@ class Server(TAXIIEndpoint):
         self._contact = contact  # optional
         roots = api_roots or []  # optional
         self._api_roots = [ApiRoot(url,
+                                   conn=self._conn,
                                    user=self._user,
                                    password=self._password,
                                    verify=self._verify,
