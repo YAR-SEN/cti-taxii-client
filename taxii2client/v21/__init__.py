@@ -9,11 +9,11 @@ import six
 import six.moves.urllib.parse as urlparse
 
 from .. import MEDIA_TYPE_TAXII_V21
-from ..common import _filter_kwargs_to_query_params, _TAXIIEndpoint
+from ..common import _filter_kwargs_to_query_params, TAXIIEndpoint
 from ..exceptions import AccessError, ValidationError
 
 
-class Status(_TAXIIEndpoint):
+class Status(TAXIIEndpoint):
     """TAXII Status Resource.
 
     This class represents the ``Get Status`` endpoint (section 4.3) and also
@@ -165,7 +165,7 @@ class Status(_TAXIIEndpoint):
                                              self.id))
 
 
-class Collection(_TAXIIEndpoint):
+class Collection(TAXIIEndpoint):
     """Information about a TAXII Collection.
 
     This class represents the ``Get a Collection`` endpoint (section 5.2), and
@@ -443,7 +443,7 @@ class Collection(_TAXIIEndpoint):
         return self._conn.get(self.url + "manifest/", headers={"Accept": accept}, params=query_params)
 
 
-class ApiRoot(_TAXIIEndpoint):
+class ApiRoot(TAXIIEndpoint):
     """Information about a TAXII API Root.
 
     This class corresponds to the ``Get API Root Information`` (section 4.2)
@@ -587,7 +587,7 @@ class ApiRoot(_TAXIIEndpoint):
         return Status(status_url, conn=self._conn, status_info=response)
 
 
-class Server(_TAXIIEndpoint):
+class Server(TAXIIEndpoint):
     """Information about a server hosting a Discovery service.
 
     This class corresponds to the Server Discovery endpoint (section 4.1) and

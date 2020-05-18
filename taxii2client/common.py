@@ -137,7 +137,7 @@ def _grab_total_items(resp):
         ), e)
 
 
-class _TAXIIEndpoint(object):
+class TAXIIEndpoint(object):
     """Contains some data and functionality common to all TAXII endpoint
     classes: a URL, connection, and ability to close the connection.  It also
     yields support in subclasses for use as context managers, to ensure
@@ -152,7 +152,7 @@ class _TAXIIEndpoint(object):
             user (str): username for authentication (optional)
             password (str): password for authentication (optional)
             verify (bool): validate the entity credentials (default: True)
-            conn (_HTTPConnection): A connection to reuse (optional)
+            conn (HTTPConnection): A connection to reuse (optional)
             proxies (dict): key/value pair for http/https proxy settings.
                 (optional)
             version (str): The spec version this connection is meant to follow.
@@ -164,7 +164,7 @@ class _TAXIIEndpoint(object):
         elif conn:
             self._conn = conn
         else:
-            self._conn = _HTTPConnection(user, password, verify, proxies, version=version)
+            self._conn = HTTPConnection(user, password, verify, proxies, version=version)
 
         # Add trailing slash to TAXII endpoint if missing
         # https://github.com/oasis-open/cti-taxii-client/issues/50
@@ -184,7 +184,7 @@ class _TAXIIEndpoint(object):
         return False
 
 
-class _HTTPConnection(object):
+class HTTPConnection(object):
     """This library uses the ``requests`` library, which presents a convenience
     API which hides many network details like actual connection objects.  So
     this class doesn't represent a traditional ``connection`` either.  It's a

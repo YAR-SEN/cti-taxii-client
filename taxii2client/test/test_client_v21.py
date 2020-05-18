@@ -7,7 +7,7 @@ import six
 
 from taxii2client import DEFAULT_USER_AGENT, MEDIA_TYPE_TAXII_V21
 from taxii2client.common import (
-    _filter_kwargs_to_query_params, _HTTPConnection, _TAXIIEndpoint
+    _filter_kwargs_to_query_params, HTTPConnection, TAXIIEndpoint
 )
 from taxii2client.exceptions import (
     AccessError, InvalidArgumentsError, InvalidJSONError,
@@ -732,10 +732,10 @@ def test_params_filter_unknown():
 
 def test_taxii_endpoint_raises_exception():
     """Test exception is raised when conn and (user or pass) is provided"""
-    conn = _HTTPConnection(user="foo", password="bar", verify=False)
+    conn = HTTPConnection(user="foo", password="bar", verify=False)
 
     with pytest.raises(InvalidArgumentsError) as excinfo:
-        _TAXIIEndpoint("https://example.com/api1/collections/", conn, "other", "test")
+        TAXIIEndpoint("https://example.com/api1/collections/", conn, "other", "test")
 
     assert "A connection and user/password may not both be provided." in str(excinfo.value)
 
@@ -748,7 +748,7 @@ def test_valid_content_type_for_connection():
                   status=200,
                   content_type=MEDIA_TYPE_TAXII_V21 + "; charset=utf-8")
 
-    conn = _HTTPConnection(user="foo", password="bar", verify=False, version="2.1")
+    conn = HTTPConnection(user="foo", password="bar", verify=False, version="2.1")
     conn.get("https://example.com/api1/collections/91a7b528-80eb-42ed-a74d-c6fbd5a26116/",
              headers={"Accept": MEDIA_TYPE_TAXII_V21})
 
@@ -760,7 +760,7 @@ def test_invalid_content_type_for_connection():
                   content_type=MEDIA_TYPE_TAXII_V21)
 
     with pytest.raises(TAXIIServiceException) as excinfo:
-        conn = _HTTPConnection(user="foo", password="bar", verify=False)
+        conn = HTTPConnection(user="foo", password="bar", verify=False)
         conn.get("https://example.com/api1/collections/91a7b528-80eb-42ed-a74d-c6fbd5a26116/",
                  headers={"Accept": MEDIA_TYPE_TAXII_V21 + "; charset=utf-8"})
 
@@ -870,7 +870,7 @@ def test_collection_missing_can_write_property(collection_dict):
 
 
 def test_conn_post_kwarg_errors():
-    conn = _HTTPConnection()
+    conn = HTTPConnection()
 
     with pytest.raises(InvalidArgumentsError):
         conn.post(DISCOVERY_URL, data=1, json=2)
@@ -883,7 +883,7 @@ def test_conn_post_kwarg_errors():
 
 
 def test_user_agent_defaulting():
-    conn = _HTTPConnection(user_agent="foo/1.0")
+    conn = HTTPConnection(user_agent="foo/1.0")
     headers = conn._merge_headers({})
 
     # also test key access is case-insensitive
@@ -891,35 +891,35 @@ def test_user_agent_defaulting():
 
 
 def test_user_agent_overriding():
-    conn = _HTTPConnection(user_agent="foo/1.0")
+    conn = HTTPConnection(user_agent="foo/1.0")
     headers = conn._merge_headers({"User-Agent": "bar/2.0"})
 
     assert headers["user-agent"] == "bar/2.0"
 
 
 def test_user_agent_enforcing1():
-    conn = _HTTPConnection(user_agent=None)
+    conn = HTTPConnection(user_agent=None)
     headers = conn._merge_headers({})
 
     assert headers["user-agent"] == DEFAULT_USER_AGENT
 
 
 def test_user_agent_enforcing2():
-    conn = _HTTPConnection()
+    conn = HTTPConnection()
     headers = conn._merge_headers({"User-Agent": None})
 
     assert headers["user-agent"] == DEFAULT_USER_AGENT
 
 
 def test_user_agent_enforcing3():
-    conn = _HTTPConnection(user_agent=None)
+    conn = HTTPConnection(user_agent=None)
     headers = conn._merge_headers({"User-Agent": None})
 
     assert headers["user-agent"] == DEFAULT_USER_AGENT
 
 
 def test_header_merging():
-    conn = _HTTPConnection()
+    conn = HTTPConnection()
     headers = conn._merge_headers({"AddedHeader": "addedvalue"})
 
     assert headers == {
@@ -929,7 +929,7 @@ def test_header_merging():
 
 
 def test_header_merge_none():
-    conn = _HTTPConnection()
+    conn = HTTPConnection()
     headers = conn._merge_headers(None)
 
     assert headers == {
