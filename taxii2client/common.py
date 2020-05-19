@@ -145,7 +145,7 @@ class _TAXIIEndpoint(object):
 
     """
     def __init__(self, url, conn=None, user=None, password=None, verify=True,
-                 proxies=None, version="2.0"):
+                 proxies=None, version="2.0", auth=None):
         """Create a TAXII endpoint.
 
         Args:
@@ -165,6 +165,11 @@ class _TAXIIEndpoint(object):
             self._conn = conn
         else:
             self._conn = _HTTPConnection(user, password, verify, proxies, version=version)
+
+        if auth:
+            if conn.session.auth:
+                raise InvalidArgumentsError("Auth argument provided, but connection already has auth set.")
+            conn.session.auth = auth
 
         # Add trailing slash to TAXII endpoint if missing
         # https://github.com/oasis-open/cti-taxii-client/issues/50
