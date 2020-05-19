@@ -167,9 +167,9 @@ class _TAXIIEndpoint(object):
             version (str): The spec version this connection is meant to follow.
 
         """
-        if conn and (user or password):
-            raise InvalidArgumentsError("A connection and user/password may"
-                                        " not both be provided.")
+        if (conn and ((user or password) or auth)) or ((user or password) and auth):
+            raise InvalidArgumentsError("Only one of a connection, username/password, or auth object may"
+                                        " be provided.")
         elif conn:
             self._conn = conn
         else:
@@ -228,9 +228,6 @@ class _HTTPConnection(object):
         self.session.verify = verify
         # enforce that we always have a connection-default user agent.
         self.user_agent = user_agent or DEFAULT_USER_AGENT
-
-        if auth and (user or password):
-            raise InvalidArgumentsError()
 
         if user and password:
             self.session.auth = requests.auth.HTTPBasicAuth(user, password)
