@@ -137,6 +137,15 @@ def _grab_total_items(resp):
         ), e)
 
 
+class TokenAuth(requests.auth.AuthBase):
+    def __init__(self, key):
+        self.key = key
+
+    def __call__(self, r):
+        r.headers['Authorization'] = 'Token {}'.format(self.key)
+        return r
+
+
 class _TAXIIEndpoint(object):
     """Contains some data and functionality common to all TAXII endpoint
     classes: a URL, connection, and ability to close the connection.  It also
@@ -164,12 +173,7 @@ class _TAXIIEndpoint(object):
         elif conn:
             self._conn = conn
         else:
-            self._conn = _HTTPConnection(user, password, verify, proxies, version=version)
-
-        if auth:
-            if conn.session.auth:
-                raise InvalidArgumentsError("Auth argument provided, but connection already has auth set.")
-            conn.session.auth = auth
+            self._conn = _HTTPConnection(user, password, verify, proxies, version=version, auth=auth)
 
         # Add trailing slash to TAXII endpoint if missing
         # https://github.com/oasis-open/cti-taxii-client/issues/50
@@ -206,7 +210,7 @@ class _HTTPConnection(object):
     """
 
     def __init__(self, user=None, password=None, verify=True, proxies=None,
-                 user_agent=DEFAULT_USER_AGENT, version="2.0"):
+                 user_agent=DEFAULT_USER_AGENT, version="2.0", auth=None):
         """Create a connection session.
 
         Args:
@@ -224,8 +228,15 @@ class _HTTPConnection(object):
         self.session.verify = verify
         # enforce that we always have a connection-default user agent.
         self.user_agent = user_agent or DEFAULT_USER_AGENT
+
+        if auth and (user or password):
+            raise InvalidArgumentsError()
+
         if user and password:
             self.session.auth = requests.auth.HTTPBasicAuth(user, password)
+        elif auth:
+            self.session.auth = auth
+
         if proxies:
             self.session.proxies.update(proxies)
         self.version = version

@@ -626,6 +626,7 @@ class Server(_TAXIIEndpoint):
         self._proxies = proxies
         self._loaded = False
         self.__raw = None
+        self._auth = auth
 
     @property
     def title(self):
@@ -685,7 +686,8 @@ class Server(_TAXIIEndpoint):
                     user=self._user,
                     password=self._password,
                     verify=self._verify,
-                    proxies=self._proxies)
+                    proxies=self._proxies,
+                    auth=self._auth)
             for url in roots
         ]
         # If 'default' is one of the existing API Roots, reuse that object
